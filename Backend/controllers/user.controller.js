@@ -2,6 +2,7 @@
 const userModel = require('../models/user.model');
 const userService = require('../services/user.service');
 const { validationResult } = require('express-validator'); //to perform actions on error
+const blackListTokenModel = require('../models/blacklistToken.model');
 
 
 module.exports.registerUser = async (req, res, next) => {
@@ -52,11 +53,45 @@ module.exports.loginUser = async (req, res, next) => {
     }
 
     // if (isMatch) ; password matches then generate token
-    const token = user.generateAuthToken();
+    const token = user.generateAuthToken(); 
+
+    res.cookie('token', token);
 
     res.status(200).json({ token, user });
 }
 
 module.exports.getUserProfile = async (req, res, next) => {
     res.status(200).json(req.user);
+}
+
+module.exports.logoutUser = async (req, res, next) => {
+
+    // Implementing JWT Logout with Token Blacklisting  
+// -----------------------------------------------  
+// Logging out with JWT is a bit tricky since JWTs are stateless.  
+// To handle this, we create a **blacklist collection** in the database. e.g., '../models/blacklistToken.model'  
+// Whenever a user logs out, their token is added to this blacklist.  
+// On each request, we check if the token exists in the blacklist.  
+
+//  **Process Flow:**  
+// 1️ **User logs in** → Receives a token.  
+// 2️ **User logs out** → The token is added to the blacklist collection.  
+// 3️ **For every request** → Check if the token is blacklisted.  
+// 4️ **If blacklisted** → Reject the request (401 Unauthorized).  
+// 5️ **If not blacklisted** → Proceed with request handling.  
+
+//  **Using TTL (Time-To-Live) for Automatic Cleanup:**  
+// - **TTL (Time-To-Live)** ensures that blacklisted tokens are automatically deleted after a certain period.  
+// - We set a **TTL index** on the blacklist collection so expired tokens are removed without manual intervention.  
+
+
+res.clearCookie('token'); // Clear the token from cookies  
+
+const token = req.cookies.token || req.headers.authorization.split(' ')[1]; // Extract token from cookies or Authorization header  
+
+await blackListTokenModel.create({ token }); // Add the token to the blacklist collection  
+
+res.status(200).json({ message: 'Logged out' }); // Send a success response  
+
+
 }

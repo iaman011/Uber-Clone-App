@@ -7,22 +7,23 @@ module.exports.authUser = async (req, res, next) => {
     // this middleware aims to getprofile of user which is logged in if user user is logout return unauthorized access
     // here we need token, token mainly hame 2 jagah se milta hai; headers nd cookies ke andar 
     
-    const token = req.cookies.token || req.headers.authorization?.split(' ')[1];  //need to split in header to get token
+    const token = req.cookies.token || req.headers.authorization?.split(' ')[ 1 ];  //need to split in header to get token
   
 
     if(!token ){  //check for token existence
-        return res.status(401).json({message: "unauthorized"});
+        return res.status(401).json({message: "Unauthorized"});
     }
 
-//     const token =
-//     req.cookies.token || 
-//     (req.headers.authorization && req.headers.authorization.startsWith("bearer ")
-//         ? req.headers.authorization.split(" ")[1]
-//         : null);
+    const isBlacklisted = await userModel.findOne({token: token});
+    if(isBlacklisted){
+        return res.status(401).json({ message: 'Unauthorized'});
+    }
 
-// if (!token) {
-//     return res.status(401).json({ message: "Access denied. No token provided." });
-// }
+//     User logs in → Receives a token
+// User logs out → Token is added to blacklist
+// For each request → Check if the token is blacklisted
+// If blacklisted → Reject the request (401 Unauthorized)
+// If not blacklisted → Proceed with request handling
 
     // if(token)
       // now after getting token we need to decrypt/decode the token
