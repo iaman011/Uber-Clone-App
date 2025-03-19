@@ -1,7 +1,7 @@
 // here we write code for route handler
 const userModel = require('../models/user.model');
 const userService = require('../services/user.service');
-const { validationResult } = require('express-validator');
+const { validationResult } = require('express-validator'); //to perform actions on error
 
 
 module.exports.registerUser = async (req, res, next) => {
@@ -27,4 +27,36 @@ module.exports.registerUser = async (req, res, next) => {
     const token = user.generateAuthToken();
 
     res.status(201).json({ token, user });
+}
+
+module.exports.loginUser = async (req, res, next) => {
+
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).json({errors: errors.array() });
+    }
+
+    const { email, password } = req.body;  //email aur password ko req.body se nikal lenge
+
+    const user = await userModel.findOne({ email }).select('+password');
+
+    if (!user){
+        return res.status(401).json({ message: 'Invalid email or password'});
+    }
+
+    const isMatch = await user.comparePassword(password);
+    // we create comparePassword method in userModel.js
+
+    if (!isMatch){
+        return res.status(401).json({ message: 'Invalid email or password'});
+    }
+
+    // if (isMatch) ; password matches then generate token
+    const token = user.generateAuthToken();
+
+    res.status(200).json({ token, user });
+}
+
+module.exports.getUserProfile = async (req, res, next) => {
+    res.status(200).json(req.user);
 }
