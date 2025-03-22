@@ -6,6 +6,7 @@ import UserSignup from "./pages/UserSignup";
 import Captainlogin from "./pages/Captainlogin";
 import Captainsignup from "./pages/Captainsignup";
 import Home from "./pages/Home"
+import UserProtectWrapper from "./pages/UserProtectWrapper";
 
 
 const App = () => {
@@ -23,7 +24,12 @@ const App = () => {
 
         <Route path="/captain-signup" element={<Captainsignup />} />
 
-        <Route path="/home" element={<Home />} />
+        <Route path="/home" element={
+          // sirf jo user login hai unhi ko home page pe bhejo nhi toh unko login page par redirect kar do
+          <UserProtectWrapper>
+            <Home />
+          </UserProtectWrapper>
+        } />
 
       </Routes>
     </div>
