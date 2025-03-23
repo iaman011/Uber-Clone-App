@@ -1,37 +1,36 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-// import { useNavigate } from 'react-router-dom'
-// import axios from 'axios'
-// import { CaptainDataContext } from '../context/CapatainContext'
-import myimg4 from '../assets/uber-driver.svg'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { CaptainDataContext } from '../context/CaptainContext'
 
 const Captainlogin = () => {
 
   const [ email, setEmail ] = useState('')
   const [ password, setPassword ] = useState('')
 
-  // const { captain, setCaptain } = React.useContext(CaptainDataContext)
-  // const navigate = useNavigate()
+  const { setCaptain } = React.useContext(CaptainDataContext)
+  const navigate = useNavigate()
 
 
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    // const captain = {
-    //   email: email,
-    //   password
-    // }
+    const captain = {
+      email: email,
+      password
+    }
 
-    // const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/login`, captain)
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/login`, captain)
 
-    // if (response.status === 200) {
-    //   const data = response.data
+    if (response.status === 200) {
+      const data = response.data
 
-    //   // setCaptain(data.captain)
-    //   localStorage.setItem('token', data.token)
-    //   // navigate('/captain-home')
+      setCaptain(data.captain)
+      localStorage.setItem('token', data.token)
+      navigate('/captain-home')
 
-    // }
+    }
 
     setEmail('')
     setPassword('')
@@ -39,7 +38,7 @@ const Captainlogin = () => {
   return (
     <div className='p-7 h-screen flex flex-col justify-between'>
       <div>
-        <img className='w-20 mb-3' src={myimg4} alt="" />
+        <img className='w-20 mb-3' src="https://www.svgrepo.com/show/505031/uber-driver.svg" alt="" />
 
         <form onSubmit={(e) => {
           submitHandler(e)
@@ -73,7 +72,7 @@ const Captainlogin = () => {
           >Login</button>
 
         </form>
-        <p className='text-center'>Partner up and begin driving now? <Link to='/captain-signup' className='text-blue-600'>Register as a Captain</Link></p>
+        <p className='text-center'>Join a fleet? <Link to='/captain-signup' className='text-blue-600'>Register as a Captain</Link></p>
       </div>
       <div>
         <Link
